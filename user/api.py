@@ -1,8 +1,12 @@
+import os
+import time
+
 from django.core.cache import cache
 from django.http import JsonResponse
 
 from common import utils, errors, config
 from lib.http import render_json
+from swiper import settings
 from user import logic
 from user.forms import ProfileForm
 from user.models import Users
@@ -48,16 +52,26 @@ def get_profile(request):
 def set_profile(request):
     user = request.user
 
-    form = ProfileForm(request.POST)
+    form = ProfileForm(request.POST,instance=user.profile)
     if form.is_valid():
-        profile = form.save(commit=False)
-
-        profile.id = user.id
-        profile.save()
+        form.save()
 
         return render_json()
     else:
         return render_json(data=form.errors)
 
 def upload_avatar(request):
-    pass
+    avatar = request.FILES.get('avatar')
+    user =request.user
+    filename = 'avatar-%s-%d' % (user.id, int(time.time()))
+    filepath = os.path.join(settings.MEDIA_ROOT, filename)
+
+    with open(filepath, 'wb+') as output:
+        for chunk in avatar.chunks():
+            output.write(chunk)
+
+    user.avatar = filename
+    user.save()
+
+    return render_json()
+
