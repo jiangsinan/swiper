@@ -1,8 +1,19 @@
-from django.shortcuts import render
+from lib.http import render_json
+from social import logic
+from social.models import Swiped
+from user.models import Users
 
-# Create your views here.
 def recommend(request):
-    return None
+    """
+    根据当前登录用户的 profile 筛选符合条件的用户
+    :param request:
+    :return:
+    """
+    recm_users = logic.recommend_users(request.user)
+
+    users = [u.to_dict() for u in recm_users]
+
+    return render_json(data=users)
 
 
 def like(request):
