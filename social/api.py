@@ -1,3 +1,4 @@
+from common import errors
 from lib.http import render_json
 from social import logic
 from social.models import Swiped
@@ -17,7 +18,12 @@ def recommend(request):
 
 
 def like(request):
-    return None
+    sid = request.POST.get('sid')
+    user = request.user
+    if logic.like_some(user.id,sid):
+        return render_json()
+    else:
+        return render_json(code = errors.LIKE_ERR)
 
 
 def superlike(request):
