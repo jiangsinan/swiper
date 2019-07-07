@@ -1,6 +1,6 @@
 import datetime
 
-from social.models import Swiped
+from social.models import Swiped, Friend
 from user.models import Users
 
 
@@ -35,4 +35,16 @@ def like_some(uid, sid):
     if not Users.objects.filter(id=sid).exists():
         return False
     Swiped.objects.create(uid=uid,sid=sid,mark = 'like')
+
+    if Swiped.is_like(sid,uid):
+        Friend.make_friend(uid,sid)
+    return True
+
+
+def superlike_some(uid, sid):
+    if not Users.objects.filter(id=sid).exists():
+        return False
+    Swiped.objects.create(uid=uid,sid=sid,mark = 'superlike')
+
+    Friend.make_friend(uid,sid)
     return True

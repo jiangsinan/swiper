@@ -18,7 +18,7 @@ def recommend(request):
 
 
 def like(request):
-    sid = request.POST.get('sid')
+    sid = int(request.POST.get('sid'))
     user = request.user
     if logic.like_some(user.id,sid):
         return render_json()
@@ -27,7 +27,12 @@ def like(request):
 
 
 def superlike(request):
-    return None
+    sid = int(request.POST.get('sid'))
+    user = request.user
+    if logic.superlike_some(user.id, sid):
+        return render_json()
+    else:
+        return render_json(code=errors.LIKE_ERR)
 
 
 def dislike(request):
