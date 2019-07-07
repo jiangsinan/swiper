@@ -37,7 +37,8 @@ def like_some(uid, sid):
     Swiped.objects.create(uid=uid,sid=sid,mark = 'like')
 
     if Swiped.is_like(sid,uid):
-        Friend.make_friend(uid,sid)
+        # Friend.make_friend(uid,sid)
+        Friend.objects.make_friends(uid, sid)
     return True
 
 
