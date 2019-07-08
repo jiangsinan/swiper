@@ -1,6 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 
 from common import errors
+from common.errors import LogicException, LogicError
 from lib.http import render_json
 from user.models import Users
 
@@ -21,3 +22,10 @@ class AuthMiddleware(MiddlewareMixin):
 
 
         request.user = Users.objects.get(id=uid)
+
+
+class LogicExceptionMiddleware(MiddlewareMixin):
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, (LogicException, LogicError)):
+            return render_json(code=exception.code)
