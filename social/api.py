@@ -18,25 +18,45 @@ def recommend(request):
 
 
 def like(request):
+    """
+    喜欢
+    :param request:
+    :return:
+    """
     sid = int(request.POST.get('sid'))
     user = request.user
-    if logic.like_some(user.id,sid):
-        return render_json()
-    else:
-        return render_json(code = errors.LIKE_ERR)
+
+    matched = logic.like_some(user.id, sid)
+
+    return render_json(data={'matched': matched})
 
 
 def superlike(request):
+    """
+    超级喜欢
+    :param request:
+    :return:
+    """
     sid = int(request.POST.get('sid'))
     user = request.user
-    if logic.superlike_some(user.id, sid):
-        return render_json()
-    else:
-        return render_json(code=errors.LIKE_ERR)
+
+    matched = logic.superlike_some(user.id, sid)
+
+    return render_json(data={'matched': matched})
 
 
 def dislike(request):
-    return None
+    """
+       不喜欢
+       :param request:
+       :return:
+       """
+    sid = int(request.POST.get('sid'))
+    user = request.user
+
+    Swiped.swipe(uid=user.id, sid=sid, mark='dislike')
+
+    return render_json()
 
 
 def rewind(request):

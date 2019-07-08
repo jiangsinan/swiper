@@ -1,6 +1,9 @@
 from django.db import models
 
 # Create your models here.
+from common import errors
+from common.errors import LogicException
+
 
 class Swiped(models.Model):
     """
@@ -21,6 +24,25 @@ class Swiped(models.Model):
     def is_like(cls,sid,uid):
         return cls.objects.filter(uid=uid,sid=sid,mark__in=['like','superlike']).exists()
 
+    @classmethod
+    def swipe(cls, uid, sid, mark):
+        """
+        记录滑动行为
+        :param uid:
+        :param sid:
+        :param mark:
+        :return:
+            如果滑动成功，则返回 True，否则返回 False
+        """
+        marks = [m for m, _ in cls.MARKS]
+        if mark not in marks:
+            raise LogicException(errors.SWIPE_ERR)
+
+        if cls.objects.filter(uid=uid, sid=sid).exists():
+            return False
+        else:
+            cls.objects.create(uid=uid, sid=sid, mark=mark)
+            return True
 
     class Meta:
         db_table = 'swiped'

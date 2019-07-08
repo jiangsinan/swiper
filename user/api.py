@@ -24,7 +24,7 @@ def verify_phone(request):
         if logic.send_verify_code(phone_num):
             return render_json()
         else:
-            return render_json(code=errors.SMS_SEND_ERR)
+            return render_json(code=errors.PhoneNumError.code)
 
     return render_json(code=errors.PHONE_NUM_ERR)
 
@@ -38,7 +38,7 @@ def login(request):
     cached_code = cache.get(config.VERIFY_CODE_CACHE_PREFIX % phone_num)
     print(cached_code,code)
     if cached_code != code:
-        return render_json(code = errors.VERIFY_CODE_ERR)
+        return render_json(code = errors.VerifyCodeError.code)
 
     user,_ = Users.objects.get_or_create(phonenum=phone_num)
     request.session['uid'] = user.id
@@ -93,4 +93,4 @@ def upload_avatar(request):
     if ret:
         return render_json()
     else:
-        return render_json(code=errors.AVATAR_UPLOAD_ERR)
+        return render_json(code=errors.AvatarUploadError.code)

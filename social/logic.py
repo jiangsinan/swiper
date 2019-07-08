@@ -1,5 +1,6 @@
 import datetime
 
+from common import errors
 from social.models import Swiped, Friend
 from user.models import Users
 
@@ -33,19 +34,23 @@ def recommend_users(user):
 
 def like_some(uid, sid):
     if not Users.objects.filter(id=sid).exists():
-        return False
-    Swiped.objects.create(uid=uid,sid=sid,mark = 'like')
+        raise errors.SidError
 
-    if Swiped.is_like(sid,uid):
+    ret = Swiped.swipe(uid=uid, sid=sid, mark='like')
+
+    if ret and Swiped.is_like(sid,uid):
         # Friend.make_friend(uid,sid)
         Friend.objects.make_friends(uid, sid)
-    return True
+    return ret
 
 
 def superlike_some(uid, sid):
     if not Users.objects.filter(id=sid).exists():
         return False
-    Swiped.objects.create(uid=uid,sid=sid,mark = 'superlike')
 
-    Friend.make_friend(uid,sid)
-    return True
+    ret = Swiped.swipe(uid=uid,sid=sid,mark='superlike')
+    if ret:
+        Friend.make_friend(uid,sid)
+    return ret
+
+
