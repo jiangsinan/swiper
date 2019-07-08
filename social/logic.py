@@ -1,6 +1,8 @@
 import datetime
 
-from common import errors
+from django.core.cache import cache
+
+from common import errors, config
 from social.models import Swiped, Friend
 from user.models import Users
 
@@ -54,3 +56,27 @@ def superlike_some(uid, sid):
     return ret
 
 
+def rewind(user):
+    """
+    撤销当前登录用户的上传一次滑动操作
+    每天只能撤销三次
+    :param user:
+    :return:
+    """
+    key = config.REWIND_CACHE_PREFIX % user.id
+
+    rewind_times = cache.get(key, 0)
+
+    if rewind_times >= config.REWIND_TIMES:
+        raise errors.RewindLimitError
+
+    swipe = Swiped.objects.filter(uid=user.id).latest('created_at')
+
+    if swipe.mark in ['like', 'superlike']:
+        Friend.cancel_friends(user.id, swipe.sid)
+
+    swipe.delete()
+
+    now = datetime.datetime.now()
+    timeout = 86400 - now.hour * 3600 - now.minute * 60 - now.second
+    cache.set(key, rewind_times + 1, timeout=timeout)

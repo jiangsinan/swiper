@@ -60,7 +60,17 @@ def dislike(request):
 
 
 def rewind(request):
-    return None
+    """
+    反悔
+    不需要从客户端获取数据
+    :param request:
+    :return:
+    """
+    user = request.user
+    logic.rewind(user)
+
+    return render_json()
+
 
 
 def liked_me(request):
